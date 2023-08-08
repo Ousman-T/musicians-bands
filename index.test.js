@@ -81,8 +81,27 @@ describe('Band, Musician, and Song Models', () => {
         });
         await musician1.save();
         const deleteMusician = await Musician.destroy({where:{instrument: 'Guitar'}});
-        console.log(JSON.stringify(deleteMusician, null, 2));
+        // console.log(JSON.stringify(deleteMusician, null, 2));
         const fetchedMusician = await Musician.findOne({where:{instrument:'Guitar'}});
         expect(fetchedMusician).toBe(null);
+    })
+    test('Musician to band one to many test', async () => {
+        const band3 = await Band.create({name:'Band of Brothers', genre:'Rap'});
+        const manyMusicians = await Musician.bulkCreate([{name: 'Ye', instrument:'Keys'},{name:'Jay-Z', instrument:'Voice'}, {name:'Beanie Siegel', instrument:'Bass'}]);
+        // console.log(JSON.stringify(manyMusicians, null, 2));
+        await band3.addMusician(manyMusicians);
+        const musiciansInBand = await Band.findAll({where:{genre: 'Rap'}, include: Musician});
+        console.log('---------------MUSICIANS IN BAND------------');
+        console.log(JSON.stringify(musiciansInBand, null, 2));
+        // expect(musiciansInBand.getMusician()).toContain(manyMusicians);
+
+    })
+    test('Many to many songs vs band', async () => {
+        const newBand = await Band.create({name:'The Food Fighters', genre:'Metal'});
+        const otherNewBand = await Band.create({name: 'The Fugees', genre:'Soul'});
+        const manySongs = Song.bulkCreate([{name:'The Martyrs', year:2014, length:4},{name:'Momentum', year:2021, length: 7},{name:'Ghost', year:2019, length:5}]);
+        newBand.addSong(manySongs);
+        console.log(JSON.stringify(newBand, null, 2));
+        // expect(newBand.Songs).toBe(manySongs);
     })
 })
